@@ -63,7 +63,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
             .build();
     private static final Introspected.AccessKind[] DEFAULT_ACCESS_KIND = { Introspected.AccessKind.METHOD };
 
-    private Map<String, BeanIntrospectionWriter> writers = new LinkedHashMap<>(10);
+    private Map<String, BeanIntrospectionWriter2> writers = new LinkedHashMap<>(10);
     private List<AbstractIntrospection> abstractIntrospections = new ArrayList<>();
     private AbstractIntrospection currentAbstractIntrospection;
     private ClassElement currentClassElement;
@@ -195,7 +195,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
 
                 classElement.ifPresent(ce -> {
                     if (ce.isPublic() && !isIntrospected(context, ce)) {
-                        final BeanIntrospectionWriter writer = new BeanIntrospectionWriter(
+                        final BeanIntrospectionWriter2 writer = new BeanIntrospectionWriter2(
                                 element.getName(),
                                 index.getAndIncrement(),
                                 element,
@@ -219,7 +219,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
                         if (classElement.isAbstract() || !classElement.isPublic() || isIntrospected(context, classElement)) {
                             continue;
                         }
-                        final BeanIntrospectionWriter writer = new BeanIntrospectionWriter(
+                        final BeanIntrospectionWriter2 writer = new BeanIntrospectionWriter2(
                                 element.getName(),
                                 j++,
                                 element,
@@ -233,7 +233,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
             }
         } else {
 
-            final BeanIntrospectionWriter writer = new BeanIntrospectionWriter(
+            final BeanIntrospectionWriter2 writer = new BeanIntrospectionWriter2(
                     element,
                     metadata ? element.getAnnotationMetadata() : null
             );
@@ -270,7 +270,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
             }
 
             if (!writers.isEmpty()) {
-                for (BeanIntrospectionWriter writer : writers.values()) {
+                for (BeanIntrospectionWriter2 writer : writers.values()) {
                     try {
                         writer.accept(visitorContext);
                     } catch (IOException e) {
@@ -291,7 +291,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
             Set<String> excludedAnnotations,
             Set<AnnotationValue> indexedAnnotations,
             ClassElement ce,
-            BeanIntrospectionWriter writer,
+            BeanIntrospectionWriter2 writer,
             Introspected.AccessKind...accessKinds) {
         Optional<MethodElement> constructorElement = ce.getPrimaryConstructor();
         if (ce.isAbstract() && !constructorElement.isPresent() && ce.hasStereotype(Introspected.class)) {
@@ -374,7 +374,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
     private void process(
             @Nullable MethodElement constructorElement,
             @Nullable MethodElement defaultConstructor,
-            BeanIntrospectionWriter writer,
+            BeanIntrospectionWriter2 writer,
             List<PropertyElement> beanProperties,
             Set<String> includes,
             Set<String> excludes,
@@ -399,7 +399,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
     }
 
     private void processBeanProperties(
-            BeanIntrospectionWriter writer,
+            BeanIntrospectionWriter2 writer,
             Collection<? extends PropertyElement> beanProperties,
             Set<String> includes,
             Set<String> excludes,
@@ -453,7 +453,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
      * Holder for an abstract introspection.
      */
     private class AbstractIntrospection {
-        final BeanIntrospectionWriter writer;
+        final BeanIntrospectionWriter2 writer;
         final Set<String> includes;
         final Set<String> excludes;
         final Set<String> ignored;
@@ -462,7 +462,7 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
         final Map<String, AbstractPropertyElement> properties = new LinkedHashMap<>();
 
         public AbstractIntrospection(
-                BeanIntrospectionWriter writer,
+                BeanIntrospectionWriter2 writer,
                 Set<String> includes,
                 Set<String> excludes,
                 Set<String> ignored,
